@@ -1,0 +1,86 @@
+body {
+    margin: 0; /* removes default margin */
+    height: 100vh; /* full viewport height */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(12, 42, 134, 1);
+    background-image: url("./public/BG.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px; /* spacing from login box */
+}
+
+.login_page_text h2{
+    padding: auto;
+    text-align: center;
+    font-weight: bold;
+    font-size: 2em;
+    color: rgba(255, 255, 255, 1);
+}
+.a {
+  display: flex;
+  margin: auto;
+  align-items: center;
+  justify-content: center;
+}
+
+.login_page_text {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 30px;
+  border-radius: 12px;
+  width: 500px;
+}
+.Username,.Password{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.Username input,
+.Password input {
+  background-color: aliceblue;
+  border: 1rcap solid blue;
+  width: 80%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  font-size: 1em;
+}
+.login_button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%; /* or a fixed width if needed */
+  margin-top: 20px; /* optional spacing */
+}
+
+.login_button button {
+  padding: 10px 20px;
+  background-color: aliceblue;
+  border: 2px solid blue;
+  color: blue;
+  font-size: 1em;
+  border-radius: 6px; /* optional: rounded corners */
+  cursor: pointer;
+}
+
+.login_page_text p{
+    text-align: right;
+    padding: 0 2px 2px 5px;
+}
+.login_page_text p a{
+    color:aliceblue;
+    
+}
+.login_page_text  p :hover{
+    
+    font-weight: bold;
+}
