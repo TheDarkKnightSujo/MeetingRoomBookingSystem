@@ -286,6 +286,7 @@ app.get('/bookings/:id', async(req, res) => {
     res.status(500).json({ error: "Failed to fetch booking" });
   }
 });
+//'/bookings/my'
 app.post('/meeting-rooms/:roomId/booking',async(req,res)=>{
     
     const {User_ID,Title,Start_Time,End_Time}=req.body;
@@ -339,8 +340,9 @@ app.delete('/bookings/:id', async(req, res) => {
 
 //participants
 app.get('/bookings/:bookingID/participants',async(_,res)=>{
+  const id=req.params.bookingID;
     try{
-        const Participant=await Participants.findAll();
+        const Participant=await Participants.findAll({where:{Booking_ID:id}});
         return res.json(Participant);
     }
     catch(err){
@@ -350,17 +352,79 @@ app.get('/bookings/:bookingID/participants',async(_,res)=>{
 });
 app.post('/bookings/:bookingID/participants', async (req, res) => {
   
-  const id=req.params.bookingID;
-  const { Name, Description, Capacity} = req.body;
+  const Bookingid=req.params.bookingID;
+  const { email } = req.body;
+  if(!email){
+    return res.status(400).json({error:"Please provide email address"});
+  }
+  const emailList=email.split(',').map(email=>email.trim());
+  try{
+    const booking =await Booking.findByPk(Bookingid);
+    if(!booking){
+      return res.status(404).json({error:"Booking not found"});
+    }
+    const users=await User.findAll({where:{Email:emailList}});
+    if(users.length===0){
+      return res.status(404).json({error:"Users not found"});
+    }
+      const participantsData=users.map(user=>({
+        Booking_ID:Bookingid,
+        User_ID:user.user_ID,
+      }));
+      const addedParticipants = await Participants.bulkCreate(participantsData);
+      return res.json({ message: "Participants added", participants: addedParticipants });
+  }
+  catch(err){
+    console.error("Error adding participants:", err);
+    res.status(500).json({ error: "Failed to add participants" });
+  }
+});
+app.put('/bookings/:bookingId/participants/:userId', async (req, res) => {
+  const Bookingid = req.params.bookingId;
+  const Userid=req.params.userId;
+  const {Invitation_Status,Notification_Sent} = req.body;
 
+  try {
+    const [updated] = await Participants.update(
+      {Invitation_Status,Notification_Sent},
+      { where: { 
+        Booking_ID: Bookingid,
+        User_Id:Userid
+       }}
+    );
+
+    if (updated === 0) {
+      return res.status(404).json({ message: "Participant not found or no changes made" });
+    }
+
+    const updatedBooking = await Booking.findByPk(id);
+    res.json({ message: "Participant updated", data: updatedBooking });
+  } catch (err) {
+    console.error("Update error:", err);
+    res.status(500).json({ error: "Failed to update Participant" });
+  }
+});
+app.delete('/bookings/:bookingId/participants/:userId', async(req, res) => {
+    const Bookingid = req.params.bookingId;
+    const Userid=req.params.userId;
+    try {
+    const participant = await Participants.destroy({where:{Booking_ID:Bookingid,User_ID:Userid}});
+
+    if (!participant) {
+      return res.status(404).json({ message: "Participant not found" });
+    }
+    res.json(participant);
+    } catch (err) {
+    console.error("Fetch by ID error:", err);
+    res.status(500).json({ error: "Failed to fetch Participant" });
+  }
 });
 
-
-
 //minutes
-app.get('/bookings/:bookingID/minutes',async(_,res)=>{
+app.get('/bookings/:bookingID/minutes',async(req,res)=>{
+  const id=req.params.bookingID;
     try{
-        const Meeting_Minute=await Meeting_Minutes.findAll();
+        const Meeting_Minute=await Meeting_Minutes.findAll({where:{Booking_ID:id}});
         return res.json(Meeting_Minute);
     }
     catch(err){

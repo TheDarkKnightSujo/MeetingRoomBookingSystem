@@ -22,6 +22,10 @@ const { FOREIGNKEYS } = require("sequelize/lib/query-types");
   db.room_feature_mapping=require('./room_feature_mapping.model')(sequelize,DataTypes);
   db.recurring_bookings=require('./recurringbooking.model')(sequelize,DataTypes);
 
+  db.meetingroom.belongstO(db.location);
+
+
+
   db.meetingroom.belongsToMany(db.room_feature,{
     through: db.room_feature_mapping,
     foreignKey:"Room_ID",
@@ -46,7 +50,7 @@ const { FOREIGNKEYS } = require("sequelize/lib/query-types");
 //   as: "rooms"    
 // });
 
-  db.sequelize.sync()
+  db.sequelize.sync({alter:true})
     .then(() => console.log("Database synced"))
     .catch(err => console.error("DB sync error:", err));
 

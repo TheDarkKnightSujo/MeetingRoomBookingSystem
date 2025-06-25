@@ -16,6 +16,7 @@ module.exports=(sequelize,DataTypes)=>{
         Email:{
             type:DataTypes.STRING,
             allowNull:false,
+            unique: true,
         },
         Role:{
             type:DataTypes.STRING,
