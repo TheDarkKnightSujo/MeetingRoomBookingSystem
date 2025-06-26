@@ -3,6 +3,8 @@ const cors = require("cors");
 const db = require("./models");  
 const { where } = require("sequelize");
 const app = express();
+const verifyJWT=require('./verifyJWT.js');
+const verifyAdmin=require('./verifyadmin.js');
 
 app.use(cors());
 app.use(express.json());
@@ -16,20 +18,20 @@ const bookingRoutes=require("./routes/bookingroutes.js");
 const auditlogsRouter=require("./routes/auditlogsroutes.js");
 // const mysql=require('mysql2');
 
-const User = db.users;
-const Location=db.location;
-const MeetingRoom=db.meetingroom;
-const Room_Features=db.room_feature;
-const Booking=db.booking;
-const Participants=db.participants;
-const Meeting_Minutes=db.meeting_minutes;
-const Audit_logs=db.audit_log;
-const Recurring_Booking=db.recurring_bookings;
+// const User = db.users;
+// const Location=db.location;
+// const MeetingRoom=db.meetingroom;
+// const Room_Features=db.room_feature;
+// const Booking=db.booking;
+// const Participants=db.participants;
+// const Meeting_Minutes=db.meeting_minutes;
+// const Audit_logs=db.audit_log;
+// const Recurring_Booking=db.recurring_bookings;
 
 //users
-app.use('/users',userRoutes);
+app.use('/users',verifyJWT,userRoutes);
 // app.post("/users/register", async (req, res) => {
-//   const { First_Name, Last_Name, Email, Role, password } = req.body;
+//   const { First_Name,   Last_Name, Email, Role, password } = req.body;
 //   const hashPassword =await bcrypt.hash(password,10);
 
 //   if (!First_Name || !Last_Name || !Email || !Role || !password) {
@@ -515,7 +517,8 @@ app.use("/bookings",bookingRoutes);
 
 //recurring meetings
 app.post('/bookings/recurring',async(req,res)=>{
-  
+  const {}=req.body;
+
 })
 
 

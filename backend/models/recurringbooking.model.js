@@ -14,9 +14,9 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     Frequency: {
-      type: DataTypes.ENUM('Daily','Weekly','Monthly');
+      type: DataTypes.ENUM('Daily','Weekly','Monthly'),
       allowNull:false,
-      default:'Daily'
+      defaultValue:'Daily'
     },
     End_Date: {
       type: DataTypes.DATEONLY,
