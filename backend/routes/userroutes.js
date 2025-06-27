@@ -8,9 +8,6 @@ const verifyJwt=require("../verifyJWT");
 const verifyAdmin=require("../verifyadmin");
 
 const User=db.users;
-const Recurring = db.recurring_bookings;
-const Participants = db.participants;
-const Booking=db.booking;
 
 router.get('/me',verifyJwt,async(req,res)=>{
   try{
