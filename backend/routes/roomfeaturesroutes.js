@@ -1,6 +1,11 @@
 const express= require('express');
 const router = express.Router();
 const db=require("./models");
+const jwt=require('jsonwebtoken');
+require('dotenv').config();
+
+const verifyJwt=require("../verifyJWT");
+const verifyAdmin=require("../verifyadmin");
 
 const Room_Features=db.room_feature;
 
@@ -14,7 +19,7 @@ router.get('/',async(_,res)=>{
         res.status(500).json({ error: "Server Error" });
     }
 });
-router.post("/", async (req, res) => {
+router.post("/",verifyJwt,verifyAdmin, async (req, res) => {
   const { Name } = req.body;
 
   if (!Name) {

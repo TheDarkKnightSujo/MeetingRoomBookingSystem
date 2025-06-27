@@ -8,6 +8,10 @@ const verifyJwt=require("../verifyJWT");
 const verifyAdmin=require("../verifyadmin");
 
 const User=db.users;
+const Recurring = db.recurring_bookings;
+const Participants = db.participants;
+const Booking=db.booking;
+
 router.get('/me',verifyJwt,async(req,res)=>{
   try{
         const user=await User.findbyPk(req.user.User_ID,{
@@ -106,5 +110,45 @@ router.put('/me',verifyJwt,async(req,res)=>{
     res.status(500).json({error:"Update failed"});
   }
 });
+router.put('/me',verifyJwt,verifyAdmin,async(req,res)=>{
+  const {First_Name,Last_Name,Email,password,Role}=req.body;
+  try{
+    const userID= req.user.User_ID;
+    const currentuser=await User.findbyPk(userID);
+    if(!currentuser){
+      res.status(404).json({error:"User not found"});
+    }
+    if (First_Name) currentuser.First_Name = First_Name;
+    if (Last_Name) currentuser.Last_Name = Last_Name;
+    if (Email) currentuser.Email = Email;
+    if(Role)currentuser.Role=Role;
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      currentuser.password = hashedPassword;
+    }
+    await currentuser.save();
+    res.json(currentuser);
+  }
+  catch(err){
+    console.error("Error updating user details");
+    res.status(500).json({error:"Update failed"});
+  }
+});
+router.delete('/me',verifyJwt,async(req,res)=>{
+  const id=req.user.User_ID;
+  try{
+    const currentuser = await User.destroy({where:{User_ID:id}});
+
+    if (!currentuser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(currentuser);
+  }catch(err){
+    console.error("Fetch by ID error:", err);
+    res.status(500).json({ error: "Failed to delete user" });
+  }
+});
+
+
 
 module.exports=router;

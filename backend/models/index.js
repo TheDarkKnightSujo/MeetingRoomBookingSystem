@@ -22,10 +22,21 @@ const { FOREIGNKEYS } = require("sequelize/lib/query-types");
   db.room_feature_mapping=require('./room_feature_mapping.model')(sequelize,DataTypes);
   db.recurring_bookings=require('./recurringbooking.model')(sequelize,DataTypes);
 
-  db.meetingroom.belongstO(db.location);
+
+  db.users.hasMany(db.meetingroom,{foreignKey:"User_ID"});
+  db.meetingroom.belongsTo(db.users,{foreignKey:"User_ID"});
+
+  db.location.hasMany(db.meetingroom,{foreignKey:"Location_ID"});
+  db.meetingroom.belongsTo(db.location,{foreignKey:"Location_ID"});
+
+  db.users.hasMany(db.booking,{foreignKey:"User_ID"});
+  db.booking.belongsTo(db.users,{foreignKey:"User_ID"});
 
 
+  db.booking.hasOne(db.meeting_minutes,{foreignKey:"Booking_ID"});
+  db.meeting_minutes.belongsTo(db.booking,{foreignKey:"Booking_ID"});
 
+  
   db.meetingroom.belongsToMany(db.room_feature,{
     through: db.room_feature_mapping,
     foreignKey:"Room_ID",
@@ -36,6 +47,20 @@ const { FOREIGNKEYS } = require("sequelize/lib/query-types");
     foreignKey:"Feature_ID",
     otherKey:"Room_ID",
   })
+
+  db.booking.hasMany(db.participants, { foreignKey: "Booking_ID" });
+  db.participants.belongsTo(db.booking, { foreignKey: "Booking_ID" });
+
+  db.users.hasMany(db.participants, { foreignKey: "User_ID" });
+  db.participants.belongsTo(db.users, { foreignKey: "User_ID" });
+
+
+  db.booking.hasOne(db.recurring_bookings, { foreignKey: "Booking_ID" });
+  db.recurring_bookings.belongsTo(db.booking, { foreignKey: "Booking_ID" });
+
+
+  db.users.hasMany(db.audit_log, { foreignKey: "User_ID" });
+  db.audit_log.belongsTo(db.users, { foreignKey: "User_ID" });
 //   db.meetingroom.belongsToMany(db.room_feature, {
 //   through: db.room_feature_mapping,
 //   foreignKey: "Room_ID",

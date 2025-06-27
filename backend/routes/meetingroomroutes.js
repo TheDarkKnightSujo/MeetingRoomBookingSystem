@@ -1,6 +1,11 @@
 const express= require('express');
 const router = express.Router();
 const db=require("./models");
+const jwt=require('jsonwebtoken');
+require('dotenv').config();
+
+const verifyJwt=require("../verifyJWT");
+const verifyAdmin=require("../verifyadmin");
 
 const MeetingRoom=db.meeting;
 const Booking=db.booking;
@@ -81,8 +86,8 @@ router.post('/:roomId/booking',async(req,res)=>{
     }
 });
 
-//meeting room
-app.get('/:roomId/features',async(req,res)=>{
+//meeting room features
+router.get('/:roomId/features',async(req,res)=>{
     const roomId=req.params.roomId;
     try{
         const room=await MeetingRoom.findByPk(roomId,{
@@ -101,5 +106,46 @@ app.get('/:roomId/features',async(req,res)=>{
         res.status(500).json({ error: "Server error" });
     }
 });
+router.post('/:roomId/features',verifyJwt,verifyAdmin,async(req,res)=>{
+  const Room_ID=req.params.roomId;
+  const {Name}=req.body;
+  if (!Name) {
+    return res.status(400).json({ error: "Feature name is required" });
+  }
+  try{
+    const room = await db.meetingroom.findByPk(Room_ID);
+    if (!room) {
+      return res.status(404).json({ error: "Meeting room not found" });
+    }
+
+    let [feature] = await db.room_feature.findOrCreate({
+      where: { Name },
+    });
+    await room.addRoom_feature(feature);
+  }catch (err) {
+        console.error("Error adding room features:", err);
+        res.status(500).json({ error: "Server error" });
+  }
+});
+router.delete('/:roomId/features/:featureId', verifyJwt, verifyAdmin, async (req, res) => {
+  const { roomId, featureId } = req.params;
+
+  try {
+    const room = await MeetingRoom.findByPk(roomId);
+    const feature = await RoomFeature.findByPk(featureId);
+
+    if (!room || !feature) {
+      return res.status(404).json({ error: "Room or Feature not found" });
+    }
+
+    await room.removeRoom_feature(feature); 
+    res.json({ message: "Feature removed from room" });
+  } catch (err) {
+    console.error("Error removing feature from room:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+module.exports = router;
 
 module.exports=router;

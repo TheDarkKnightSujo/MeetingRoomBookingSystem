@@ -29,7 +29,7 @@ const auditlogsRouter=require("./routes/auditlogsroutes.js");
 // const Recurring_Booking=db.recurring_bookings;
 
 //users
-app.use('/users',verifyJWT,userRoutes);
+app.use('/users',userRoutes);
 // app.post("/users/register", async (req, res) => {
 //   const { First_Name,   Last_Name, Email, Role, password } = req.body;
 //   const hashPassword =await bcrypt.hash(password,10);
@@ -290,7 +290,7 @@ app.use('/meeting-rooms',meetingroomRoutes);
 
 
 //bookings
-app.use("/bookings",bookingRoutes);
+app.use("/bookings",verifyJWT,bookingRoutes);
 // app.get('/bookings',async(_,res)=>{
 //     try{
 //         const Bookings=await Booking.findAll();

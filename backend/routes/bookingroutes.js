@@ -1,13 +1,19 @@
 const express= require('express');
 const router = express.Router();
 const db=require("./models");
+const jwt=require('jsonwebtoken');
+require('dotenv').config(); 
+const verifyJwt=require("../verifyJWT");
+const verifyAdmin=require("../verifyadmin");
 
 const Booking=db.booking;
 const Participants=db.participants;
 const Meeting_Minutes=db.meeting_minutes;
+const MeetingRoom=db.meetingroom;
+const User=db.users;
 
 
-router.get('/',async(_,res)=>{
+router.get('/',verifyAdmin,async(_,res)=>{
     try{
         const Bookings=await Booking.findAll();
         return res.json(Bookings);
@@ -15,6 +21,19 @@ router.get('/',async(_,res)=>{
     catch(err){
         console.error(" Error fetching data:", err);
         res.status(500).json({ error: "Server Error" });
+    }
+});
+router.get('/my',async(req,res)=>{
+  try{
+        const booking=await Booking.findAll({where:{User_ID:req.user.User_ID}},{
+          attributes:{exclude:['Booking_ID']} 
+        });
+        const room=await MeetingRoom.findByPk(req.user.Room_ID);
+        return res.json(booking,room);
+    }
+    catch(err){
+        console.error("Error fetching data",err);
+        res.status(500).json({error:"Server Error"});
     }
 });
 router.get('/:id', async(req, res) => {
@@ -63,7 +82,7 @@ router.delete('/:id', async(req, res) => {
     res.json(booking);
     } catch (err) {
     console.error("Fetch by ID error:", err);
-    res.status(500).json({ error: "Failed to fetch Booking" });
+    res.status(500).json({ error: "Failed to delete Booking" });
   }
 });
 
@@ -212,5 +231,15 @@ router.delete('/:bookingId/minutes', async(req, res) => {
     res.status(500).json({ error: "Failed to fetch Minutes" });
   }
 });
+//recurring
+
+router.post("/recurring",verifyJwt,async(req,res)=>{
+
+});
+router.get("/:parentId/instances",verifyJwt,async(req,res)=>{
+  
+});
+
+
 
 module.exports=router;

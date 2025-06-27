@@ -1,9 +1,14 @@
 const express= require('express');
 const router = express.Router();
 const db=require("./models");
+const jwt=require('jsonwebtoken');
+require('dotenv').config();
+
+const verifyJwt=require("../verifyJWT");
+const verifyAdmin=require("../verifyadmin");
 
 const Audit_logs=db.audit_log;
-router.get('/',async(_,res)=>{
+router.get('/',verifyJwt,verifyAdmin,async(_,res)=>{
     try{
         const Audit_log=await Audit_logs.findAll();
         return res.json(Audit_log);
