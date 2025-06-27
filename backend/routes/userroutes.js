@@ -81,11 +81,15 @@ router.post("/login",async(req,res)=>{
       { expiresIn: "1d" }
     );
 
-    res.cookie(jwt, refreshToken , {httpOnly:true,maxAge:24*60*60*1000});
+    res.cookie('jwt', refreshToken , {httpOnly:true,maxAge:24*60*60*1000});
     res.json({refreshToken});
   }catch(err){
     res.status(401);
   }
+});
+router.post("/logout", (_, res) => {
+  res.clearCookie("jwt", { httpOnly: true, sameSite: "Strict" });
+  res.status(200).json({ message: "Logged out successfully" });
 });
 router.put('/me',verifyJwt,async(req,res)=>{
   const {First_Name,Last_Name,Email,password}=req.body;
