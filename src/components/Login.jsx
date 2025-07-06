@@ -1,6 +1,6 @@
 import React ,{useState} from "react";
 import "./login_page.css";
-import { Link } from 'react-router-dom';
+import { Link ,useNavigate} from 'react-router-dom';
 import axios from 'axios';
 
 const Login = () => {
@@ -67,10 +67,10 @@ const Login = () => {
         </form>
         <p className="forgot_password">
             <div>
-            <Link to="./ForgotPassword">Forgot Password?</Link>
+            <Link to="./forgot-password">Forgot Password?</Link>
             </div>
             <div>
-            <Link to="./ForgotPassword">Register </Link>
+            <Link to="./register">Register </Link>
             </div>
         </p>
       </div>

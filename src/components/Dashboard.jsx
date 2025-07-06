@@ -1,62 +1,148 @@
-import React ,{useState} from "react";
+import React, { useState,useEffect } from "react";
 import "./dashboard.css";
 import { Link } from 'react-router-dom';
 
-
 const Dashboard = () => {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [todayMeetings,setTodayMeetings]=useState([]);
+  const now=new Date();
+
+  const hours=now.getHours();
+  const minutes=now.getMinutes();
+  const seconds=now.getSeconds();
+  
+
+  const dayOfMonth=now.getDate();
+  const month=now.getMonth()+1;
+  const year=now.getFullYear();
+  const dayOfWeek=now.getDay();
+  // const dayOfWeek="";
+  // switch(day)
+  // {
+  //   case 0:
+  //     dayOfWeek="Sunday";
+  //     break;
+  //   case 1:
+  //     dayOfWeek="Monday";
+  //     break;
+  //   case 1:
+  //     dayOfWeek="Monday";
+  //     break;
+  //   case 1:
+  //     dayOfWeek="Monday";
+  //     break;
+  //   case 1:
+  //     dayOfWeek="Monday";
+  //     break;  
+  // }
+
+  const bookings = [
+    { id: 1, room: "Conference Room A", bookedBy: "John Smith", time: "10:00 AM - 11:00 AM", date: "2025-07-04", status: "Upcoming" },
+    { id: 2, room: "Meeting Room B", bookedBy: "Sarah Johnson", time: "2:00 PM - 3:30 PM", date: "2025-07-04", status: "Past" },
+    { id: 3, room: "Board Room", bookedBy: "Mike Davis", time: "9:00 AM - 10:30 AM", date: "2025-07-05", status: "Ongoing" },
+  ];
+
   return (
-    <>
-    <div>
-        <header>
-            <div class="brand">
-                <h1>Meeting Room Booker</h1>
-            </div>
-            <button class="logout-btn">Logout</button>
-        </header>
+    <div className="dashboard">
+      {/* Header */}
+      <header className="header">
+        <div className="brand">
+          <img src="/logo.png" alt="Company Logo" className="logo" />
+          <h1>Meeting Room Booking System</h1>
+        </div>
+        <button className="logout-btn">Logout</button>
+      </header>
 
-    <aside class="sidebar">
+      {/* Sidebar */}
+      <aside className="sidebar">
         <ul>
-        <li class="active">Dashboard</li>
-        <li><Link>Book Meeting</Link></li>
-        <li>Edit Booking</li>
-        <li>Previous Meetings</li>
-        {/* <li>Messages</li> */}
+          <li 
+            className={activeTab === 'dashboard' ? 'active' : ''}
+            onClick={() => setActiveTab('dashboard')}
+          >
+            Dashboard
+          </li>
+          <li 
+            className={activeTab === 'book' ? 'active' : ''}
+            onClick={() => setActiveTab('book')}
+          >
+            <Link to="/book">Book Meeting Room</Link>
+          </li>
+          <li 
+            className={activeTab === 'edit' ? 'active' : ''}
+            onClick={() => setActiveTab('edit')}
+          >
+            <Link to="/book">Edit Booking</Link>
+          </li>
+          <li 
+            className={activeTab === 'previous' ? 'active' : ''}
+            onClick={() => setActiveTab('previous')}
+          >
+             <Link to="/book">Previous Bookings</Link>
+          </li>
+          <li 
+            className={activeTab === 'profile' ? 'active' : ''}
+            onClick={() => setActiveTab('profile')}
+          >
+           <Link to="/book">Profile</Link>
+          </li>
         </ul>
-    </aside>
+      </aside>
 
-    <div>
-    <section class="stats">
-      <div class="card"><h3>Total Meeting</h3><p>120</p></div>
-      <div class="card"><h3>Internships Posted</h3><p>15</p></div>
-      <div class="card"><h3>Applications</h3><p>89</p></div>
-      <div class="card"><h3>Messages</h3><p>12</p></div>
-    </section>
+      {/* Main Content */}
+      <main className="main-content">
+        {/* Stats Cards */}
+        <section className="stats">
+          <div className="card">
+            <h3>Today's Meetings</h3>
+            <p>47</p>
+          </div>
+          <div className="card">
+            <h3>Past Meetings</h3>
+            <p>8</p>
+          </div>
+          <div className="card">
+            <h3>Upcoming Meetings</h3>
+            <p>12</p>
+          </div>
+        </section>
 
-    <section class="students">
-      <div class="section-header">
-        <h2>Student Applications</h2>
-        <button class="post-btn">+ Post Internship</button>
-      </div>
+        {/* Recent Bookings Section */}
+        <section className="bookings">
+          <div className="section-header">
+            <h2>Recent Meetings</h2>
+            
+          </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Branch</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>Sneha Brahmane</td><td>sneha@example.com</td><td>Computer Engineering</td><td>Shortlisted</td></tr>
-          <tr><td>Shravani Borji</td><td>shravani@example.com</td><td>IT</td><td>Applied</td></tr>
-          <tr><td>Tanvi Kharade</td><td>tanvi@example.com</td><td>EXTC</td><td>Hired</td></tr>
-        </tbody>
-      </table>
-    </section>
-  </div>
-</div>
-    </>
+          <table className="bookings-table">
+            <thead>
+              <tr>
+                <th>Room</th>
+                <th>Booked By</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody className="bookingdata">
+              {bookings.map(booking => (
+                <tr key={booking.id}>
+                  <td>{booking.room}</td>
+                  <td>{booking.bookedBy}</td>
+                  <td>{booking.date}</td>
+                  <td>{booking.time}</td>
+                  <td>
+                    <span className={`status ${booking.status.toLowerCase()}`}>
+                      {booking.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      </main>
+    </div>
   );
 };
 
