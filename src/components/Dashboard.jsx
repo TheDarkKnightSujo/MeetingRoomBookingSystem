@@ -84,7 +84,7 @@ const Dashboard = () => {
             className={activeTab === 'profile' ? 'active' : ''}
             onClick={() => setActiveTab('profile')}
           >
-           <Link to="/book">Profile</Link>
+           <Link to="/profile">Profile</Link>
           </li>
         </ul>
       </aside>
@@ -94,16 +94,16 @@ const Dashboard = () => {
         {/* Stats Cards */}
         <section className="stats">
           <div className="card">
-            <h3>Today's Meetings</h3>
+            <h3>Meetings Booked</h3>
             <p>47</p>
           </div>
           <div className="card">
-            <h3>Past Meetings</h3>
-            <p>8</p>
+            <h3>Meeting Rooms</h3>
+            <p><Link to="/meetingrooms">List</Link></p>
           </div>
           <div className="card">
-            <h3>Upcoming Meetings</h3>
-            <p>12</p>
+            <h3>Locations</h3>
+            <p><Link to="/locations">List</Link></p>
           </div>
         </section>
 

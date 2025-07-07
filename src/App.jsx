@@ -5,7 +5,10 @@ import Login from './components/Login';
 import ForgotPassword from './components/ForgotPassword';
 import Dashboard from './components/Dashboard';
 import Register from './components/Register';
-import Book from './components/book';
+import Book from './components/Book';
+import Profile from'./components/Profile';
+import MeetingRooms from './components/MeetingRooms';
+import Locations from './components/Locations';
 function App() {
   return (
     <Routes>
@@ -14,6 +17,9 @@ function App() {
       <Route path="/dashboard" element={<Dashboard/>}/> 
       <Route path="/register" element={<Register/>}/>
       <Route path="/book" element={<Book/>}/>
+      <Route path="/profile" element={<Profile/>}/>
+      <Route path="/meetingrooms" element={<MeetingRooms/>}/>
+      <Route path="/locations" element={<Locations/>}/>
     </Routes>
   );
 }

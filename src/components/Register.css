@@ -23,7 +23,10 @@
   justify-content: center;
   margin-bottom: 20px;
 }
-
+.registercontents .a .login_page_text p,
+.registercontents .a .login_page_text p link{
+  color: aliceblue;
+}
 .registercontents .logo img {
   max-width: 200px;
   height: auto;

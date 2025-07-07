@@ -3,9 +3,11 @@ import "./login_page.css";
 import { Link ,useNavigate} from 'react-router-dom';
 import axios from 'axios';
 
+
 const Login = () => {
   const [email,setEmail] =useState("");
   const [password,setPassword] =useState("");
+  const navigate = useNavigate(); 
   const handleLogin=async (e)=>{
   e.preventDefault();
   if(!email||!password){
@@ -13,8 +15,9 @@ const Login = () => {
     return;
   }
   try {
-    const response=await axios.post("http://localhost:3500/users/login",{Email:email,password},{withCredentials:true});
-    if(response.status==200){
+    const response=await axios.post("http://localhost:3001/users/login",{Email:email,password:password},{withCredentials:true});
+    if(response.status==200||response.status==204){
+      localStorage.setItem("token", response.data.token);
       alert("Login Successful");
       navigate("/dashboard");
       return;
@@ -24,8 +27,8 @@ const Login = () => {
     console.error("Login failed");
     alert("Invalid username or password")
   }
-
 };
+
   return (
     <><div className="logincontents">
      <div className="logo"><img src="/logo.png" alt="logo"  /></div>
@@ -61,18 +64,19 @@ const Login = () => {
           <button
             type="submit"
             className="login_button">
-            LOGIN
+            {/* {loading ? "Logging in..." : "LOGIN"} */}
+            Login
           </button>
           </div>
         </form>
-        <p className="forgot_password">
+        <div className="forgot_password">
             <div>
             <Link to="./forgot-password">Forgot Password?</Link>
             </div>
             <div>
             <Link to="./register">Register </Link>
             </div>
-        </p>
+        </div>
       </div>
     </div>
     </div>

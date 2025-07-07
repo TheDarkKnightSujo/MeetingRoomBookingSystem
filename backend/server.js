@@ -6,7 +6,12 @@ const app = express();
 const verifyJWT=require('./verifyJWT.js');
 const verifyAdmin=require('./verifyadmin.js');
 
-app.use(cors());
+app.use(cors(
+  {
+  origin: 'http://localhost:5173', 
+  credentials: true                
+}
+));
 app.use(express.json());
 
 
@@ -290,7 +295,7 @@ app.use('/meeting-rooms',meetingroomRoutes);
 
 
 //bookings
-app.use("/bookings",verifyJWT,bookingRoutes);
+app.use("/bookings",bookingRoutes);
 // app.get('/bookings',async(_,res)=>{
 //     try{
 //         const Bookings=await Booking.findAll();

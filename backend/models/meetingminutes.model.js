@@ -33,7 +33,9 @@ module.exports=(sequelize,DataTypes)=>{
         },
     },{
         tableName:"meeting_minutes",
-        timestamps:false
+        timestamps:false,
+        createdAt:false,
+        updatedAt:false
     });
     return MeetingMinutes;
 }

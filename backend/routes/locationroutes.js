@@ -1,6 +1,6 @@
 const express= require('express');
 const router = express.Router();
-const db=require("./models");
+const db=require("../models");
 
 const Location=db.location;
 const MeetingRoom=db.meeting
@@ -94,7 +94,7 @@ router.get('/:locationId/rooms',async(req,res)=>{
     }
 });
 
-app.post("/:locationId/rooms", async (req, res) => {
+router.post("/:locationId/rooms", async (req, res) => {
   const { Name, Description, Capacity} = req.body;
   const id=req.params.locationId;
 

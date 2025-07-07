@@ -1,6 +1,6 @@
 const express= require('express');
 const router = express.Router();
-const db=require("./models");
+const db=require("../models");
 const jwt=require('jsonwebtoken');
 require('dotenv').config();
 
@@ -69,21 +69,143 @@ router.delete('/:id', async(req, res) => {
     res.status(500).json({ error: "Failed to fetch Room" });
   }
 });
+//availabilty
+router.get("/:roomId/availability", async (req, res) => {
+  const { roomId } = req.params;
+  const { date } = req.query;
+
+  if (!date) return res.status(400).json({ error: "Date is required" });
+
+  function generateTimeSlots(date) {
+    const slots = [];
+    const ranges = [
+      { start: "09:00", end: "13:00" },
+      { start: "13:30", end: "18:00" },
+    ];
+
+    ranges.forEach(({ start, end }) => {
+      let startTime = new Date(`${date}T${start}:00`);
+      const endTime = new Date(`${date}T${end}:00`);
+
+      while (startTime < endTime) {
+        const slotEnd = new Date(startTime.getTime() + 30 * 60 * 1000);
+        slots.push({
+          start: new Date(startTime),
+          end: new Date(slotEnd),
+          isBooked: false,
+        });
+        startTime = slotEnd;
+      }
+    });
+
+    return slots;
+  }
+
+  try {
+    const slots = generateTimeSlots(date);
+
+    const startOfDay = new Date(`${date}T00:00:00`);
+    const endOfDay = new Date(`${date}T23:59:59`);
+
+    const bookings = await Booking.findAll({
+      where: {
+        Room_ID: roomId,
+        Start_Time: {
+          [Op.between]: [startOfDay, endOfDay],
+        },
+      },
+    });
+
+    slots.forEach((slot) => {
+      for (const booking of bookings) {
+        const bookingStart = new Date(booking.Start_Time);
+        const bookingEnd = new Date(booking.End_Time);
+
+        if (bookingStart < slot.end && bookingEnd > slot.start) {
+          slot.isBooked = true;
+          break;
+        }
+      }
+    });
+
+    const formatted = slots.map((slot) => ({
+      startTime: slot.start.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      endTime: slot.end.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      isBooked: slot.isBooked,
+    }));
+
+    return res.json(formatted);
+  } catch (err) {
+    console.error("Error fetching availability:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
 
 //booking
 router.post('/:roomId/booking',async(req,res)=>{
     
-    const {User_ID,Title,Start_Time,End_Time}=req.body;
-    const id=req.params.roomId;
-    if(!User_ID||!Title||!Start_Time||!End_Time)
-      return res.status(400).json({error:"Please fill all the details"})
-    try{
-      const newBooking= await Booking.create({Room_ID:id,User_ID,Title,Start_Time,End_Time});
-      res.json({ message: "Booking done successfully", booking: newBooking });
-    } catch (err) {
-    console.error("Insert error:", err);
-    res.status(500).json({ error: "Database insert failed" });
+  const userId=req.userID;
+   const { roomId } = req.params;
+  const {  title, startTime, endTime } = req.body;
+
+  if (!userId || !title || !startTime || !endTime) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+
+  try {
+    const conflict = await Booking.findOne({
+      where: {
+        Room_ID: roomId,
+        [Op.or]: [
+          {
+            Start_Time: {
+              [Op.between]: [start, end]
+            }
+          },
+          {
+            End_Time: {
+              [Op.between]: [start, end]
+            }
+          },
+          {
+            [Op.and]: [
+              { Start_Time: { [Op.lte]: start } },
+              { End_Time: { [Op.gte]: end } }
+            ]
+          }
+        ]
+      }
+    });
+
+    if (conflict) {
+      return res.status(409).json({ error: "This time slot is already booked." });
     }
+
+    const newBooking = await Booking.create({
+      Room_ID: roomId,
+      User_ID: userId,
+      Title: title,
+      Start_Time: start,
+      End_Time: end,
+      Status: "Confirmed",
+      Created_At: new Date(),
+      Updated_At: new Date(),
+    });
+
+    return res.status(201).json(newBooking);
+  } catch (err) {
+    console.error("Error booking room:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
 });
 
 //meeting room features
@@ -93,6 +215,7 @@ router.get('/:roomId/features',async(req,res)=>{
         const room=await MeetingRoom.findByPk(roomId,{
             include:{
                 model:Room_Features,
+                as: "features",
                 through:{attributes:[]}
             }
         });

@@ -41,11 +41,13 @@ const { FOREIGNKEYS } = require("sequelize/lib/query-types");
     through: db.room_feature_mapping,
     foreignKey:"Room_ID",
     otherKey:"Feature_ID",
+    as: "features"
   })
   db.room_feature.belongsToMany(db.meetingroom,{
     through: db.room_feature_mapping,
     foreignKey:"Feature_ID",
     otherKey:"Room_ID",
+    as:"rooms"
   })
 
   db.booking.hasMany(db.participants, { foreignKey: "Booking_ID" });
@@ -75,7 +77,7 @@ const { FOREIGNKEYS } = require("sequelize/lib/query-types");
 //   as: "rooms"    
 // });
 
-  db.sequelize.sync({alter:true})
+  db.sequelize.sync({alter:false})
     .then(() => console.log("Database synced"))
     .catch(err => console.error("DB sync error:", err));
 

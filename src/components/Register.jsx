@@ -22,12 +22,12 @@ const Register = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:3500/users/register",
+        "http://localhost:3001/users/register",
         {
           First_Name: fname,
           Last_Name: lname,
           Email: email,
-          Password: password,
+          password: password,
           Role: role
         },
         { withCredentials: true }
@@ -35,7 +35,7 @@ const Register = () => {
 
       if (response.status === 200) {
         alert("Register Successful");
-        navigate("/login");
+        navigate("/");
       }
     } catch (err) {
       console.error("Register failed", err);
