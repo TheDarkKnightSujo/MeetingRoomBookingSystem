@@ -25,11 +25,13 @@ module.exports=(sequelize,DataTypes)=>{
         },
         Invitation_Status:{
             type:DataTypes.BOOLEAN,
-            allowNull:false,
+            allowNull:true,
+            
         },
         Notification_Sent:{
             type:DataTypes.BOOLEAN,
-            allowNull:false,
+            allowNull:true,
+           
         },
     },{
         tableName:"participants",

@@ -37,7 +37,7 @@ router.get('/',verifyJwt,verifyAdmin,async(_,res)=>{
         res.status(500).json({error:"Server Error"});
     }
 });
-router.get('/:id',verifyJwt,verifyAdmin,async(req,res)=>{
+router.get('/:id',verifyJwt,async(req,res)=>{
   const userID=req.params.id;
   try{
     const user=await User.findByPk(userID,{attributes:{exclude:['password']}});

@@ -44,5 +44,22 @@ module.exports=(sequelize,DataTypes)=>{
     tableName: "booking",
     timestamps: false
     });
-    return Booking
-}
+      Booking.associate = (models) => {
+    Booking.belongsTo(models.users, {
+      foreignKey: "User_ID",
+      as: "User",
+    });
+
+    Booking.belongsTo(models.meetingroom, {
+      foreignKey: "Room_ID",
+      as: "MeetingRoom",
+    });
+
+    Booking.hasMany(models.participants, {
+      foreignKey: "Booking_ID",
+      as: "Participants",
+    });
+  };
+
+  return Booking;
+};

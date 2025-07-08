@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./Profile.css";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const [user, setUser] = useState(null); // Full user object
   const [editMode, setEditMode] = useState(false);
+  const navigate=useNavigate();
   const [formData, setFormData] = useState({
     First_Name: "",
     Last_Name: "",
     Email: "",
     password:""
   });
-  
+  const handleLogout=()=>{
+    localStorage.removeItem("token");
+    navigate("/");
+  }
 
 
   
@@ -84,7 +89,7 @@ const Profile = () => {
           <img src="/logo.png" alt="Company Logo" className="logo" />
           <h1>Meeting Room Booking System</h1>
         </div>
-        <button className="logout-btn">Logout</button>
+        <button className="logout-btn" onClick={handleLogout}>Logout</button>
       </header>
     <div className="profile-container">
       <h2>Your Profile</h2>

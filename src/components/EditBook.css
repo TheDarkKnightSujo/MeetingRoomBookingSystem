@@ -1,0 +1,64 @@
+.edit-bookings-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f2f2f2;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+}
+
+.edit-bookings-page h2, 
+.edit-bookings-page h3 {
+  color: #333;
+}
+
+.edit-bookings-page .booking-item {
+  background-color: #fff;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+.edit-bookings-page .booking-item h4 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  color: #007bff;
+}
+
+.edit-bookings-page .booking-item p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.edit-bookings-page button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.edit-bookings-page button:hover {
+  background-color: #0056b3;
+}
+
+.edit-bookings-page input, 
+.edit-bookings-page select {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  margin-top: 5px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.edit-form {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}

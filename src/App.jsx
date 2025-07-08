@@ -9,6 +9,8 @@ import Book from './components/Book';
 import Profile from'./components/Profile';
 import MeetingRooms from './components/MeetingRooms';
 import Locations from './components/Locations';
+import VeiwInvitations from './components/ViewInvitations';
+import EditBook from './components/EditBook';
 function App() {
   return (
     <Routes>
@@ -20,6 +22,8 @@ function App() {
       <Route path="/profile" element={<Profile/>}/>
       <Route path="/meetingrooms" element={<MeetingRooms/>}/>
       <Route path="/locations" element={<Locations/>}/>
+      <Route path="/invitations" element={<VeiwInvitations/>}/>
+      <Route path="/editbook" element={<EditBook/>}/>
     </Routes>
   );
 }

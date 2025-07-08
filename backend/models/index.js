@@ -23,14 +23,21 @@ const { FOREIGNKEYS } = require("sequelize/lib/query-types");
   db.recurring_bookings=require('./recurringbooking.model')(sequelize,DataTypes);
 
 
-  db.users.hasMany(db.meetingroom,{foreignKey:"User_ID"});
-  db.meetingroom.belongsTo(db.users,{foreignKey:"User_ID"});
+  Object.keys(db).forEach(modelName => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);  
+  }
+});
+
+
+
 
   db.location.hasMany(db.meetingroom,{foreignKey:"Location_ID"});
   db.meetingroom.belongsTo(db.location,{foreignKey:"Location_ID"});
 
   db.users.hasMany(db.booking,{foreignKey:"User_ID"});
   db.booking.belongsTo(db.users,{foreignKey:"User_ID"});
+
 
 
   db.booking.hasOne(db.meeting_minutes,{foreignKey:"Booking_ID"});
@@ -63,6 +70,14 @@ const { FOREIGNKEYS } = require("sequelize/lib/query-types");
 
   db.users.hasMany(db.audit_log, { foreignKey: "User_ID" });
   db.audit_log.belongsTo(db.users, { foreignKey: "User_ID" });
+
+  db.meetingroom.hasMany(db.booking, { foreignKey: "Room_ID" });
+  db.booking.belongsTo(db.meetingroom, { foreignKey: "Room_ID"});
+
+
+
+// etc...
+
 //   db.meetingroom.belongsToMany(db.room_feature, {
 //   through: db.room_feature_mapping,
 //   foreignKey: "Room_ID",
@@ -77,7 +92,10 @@ const { FOREIGNKEYS } = require("sequelize/lib/query-types");
 //   as: "rooms"    
 // });
 
-  db.sequelize.sync({alter:false})
+  db.sequelize.sync({alter:false
+  },{
+    logging:console.log
+  })
     .then(() => console.log("Database synced"))
     .catch(err => console.error("DB sync error:", err));
 
