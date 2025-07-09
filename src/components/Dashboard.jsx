@@ -427,7 +427,7 @@ const Dashboard = () => {
             <Link to="/editbook">Edit Booking</Link>
           </li>
           <li className={activeTab === 'previous' ? 'active' : ''} onClick={() => setActiveTab('previous')}>
-            <Link to="/previous">Previous Bookings</Link>
+            <Link to="/previous">Previous Meetings</Link>
           </li>
           <li className={activeTab === 'profile' ? 'active' : ''} onClick={() => setActiveTab('profile')}>
             <Link to="/profile">Profile</Link>
@@ -438,8 +438,8 @@ const Dashboard = () => {
       <main className="main-content">
         <section className="stats">
           <div className="card">
-            <h3>Meeting Invitations</h3>
-            <p><Link to="/invitations">View</Link></p>
+            <h3>Meeting Minutes</h3>
+            <p><Link to="/minutes">View</Link></p>
           </div>
           <div className="card">
             <h3>Meeting Rooms</h3>

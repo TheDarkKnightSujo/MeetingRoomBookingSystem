@@ -3,6 +3,9 @@ const router = express.Router();
 const db=require("../models");
 const jwt=require('jsonwebtoken');
 require('dotenv').config(); 
+const { Sequelize, DataTypes } = require("sequelize");
+const { Op } = require("sequelize");
+
 const verifyJwt=require("../verifyJWT");
 const verifyAdmin=require("../verifyadmin");
 
@@ -222,7 +225,27 @@ router.get('/',verifyAdmin,async(_,res)=>{
     res.status(500).json({ error: "Server error" });
   }
 });
-
+router.get('/mine', verifyJwt, async (req, res) => {
+  const userId = req.user.User_ID;
+  try {
+    const bookings = await Booking.findAll({
+      where: {
+        [Op.or]: [
+          { User_ID: userId },
+          {
+            Booking_ID: {
+              [Op.in]: Sequelize.literal(`(SELECT Booking_ID FROM participants WHERE User_ID = ${userId})`)
+            }
+          }
+        ]
+      }
+    });
+    res.json(bookings);
+  } catch (err) {
+    console.error("Error fetching user bookings:", err);
+    res.status(500).json({ error: "Failed to fetch bookings" });
+  }
+});
 router.get('/:id', async(req, res) => {
     const id = req.params.id;
     try {
@@ -258,21 +281,49 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({ error: "Failed to update Booking" });
   }
 });
-router.delete('/:id', async(req, res) => {
-    const id = req.params.id;
-    try {
-      await Participants.destroy({
-      where: { Booking_ID: id }
-    });
-    const booking = await Booking.destroy({where:{Booking_ID:id}});
+// router.delete('/:id', async(req, res) => {
 
-    if (!booking) {
-      return res.status(404).json({ message: "Booking not found" });
-    }
-    res.json(booking);
-    } catch (err) {
-    console.error("Fetch by ID error:", err);
-    res.status(500).json({ error: "Failed to delete Booking" });
+//     const id = req.params.id;
+//     try {
+//       await Participants.destroy({
+//       where: { Booking_ID: id }
+//     });
+//     const booking = await Booking.destroy({where:{Booking_ID:id}});
+
+//     if (!booking) {
+//       return res.status(404).json({ message: "Booking not found" });
+//     }
+//     res.json(booking);
+//     } catch (err) {
+//     console.error("Fetch by ID error:", err);
+//     res.status(500).json({ error: "Failed to delete Booking" });
+//   }
+// });
+
+// Delete booking route
+router.delete('/:id', verifyJwt, async (req, res) => {
+  const bookingId = req.params.id;
+
+  try {
+    // 1. Delete related meeting minutes
+    await db.meeting_minutes.destroy({
+      where: { Booking_ID: bookingId }
+    });
+
+    // 2. Delete participants
+    await db.participants.destroy({
+      where: { Booking_ID: bookingId }
+    });
+
+    // 3. Delete the booking
+    await db.booking.destroy({
+      where: { Booking_ID: bookingId }
+    });
+
+    res.json({ message: "Booking and related data deleted." });
+  } catch (err) {
+    console.error("Error deleting booking:", err);
+    res.status(500).json({ error: "Failed to delete booking" });
   }
 });
 
@@ -371,21 +422,53 @@ router.get('/:bookingId/minutes',async(req,res)=>{
         res.status(500).json({ error: "Server Error" });
     }
 });
-router.post('/:bookingId/minutes',async(req,res)=>{
-  const id=req.params.bookingId;
-  const {Notes_Text,Attachments_Path}=req.body;
-  const booking=await Booking.findByPk({where:{Booking_ID:id}});
-  const userID=booking.User_ID;
-  if(!Notes_Text||!Attachments_Path)
-      return res.status(400).json({error:"Please fill all the details"})
-    try{
-      const newMinute= await Meeting_Minutes.create({Booking_ID:id,Notes_Text,Attachments_Path,Created_By:userID});
-      res.json({ message: "Minute added auccessfully", meeting_minutes: newMinute });
-    } catch (err) {
+// router.post('/:bookingId/minutes',async(req,res)=>{
+//   const id=req.params.bookingId;
+//   const {Notes_Text,Attachments_Path}=req.body;
+//   const booking=await Booking.findByPk(id);
+//   const userID=booking.User_ID;
+//   if(!Notes_Text||!Attachments_Path)
+//       return res.status(400).json({error:"Please fill all the details"})
+//     try{
+//       const newMinute= await Meeting_Minutes.create({Booking_ID:id,Notes_Text,Attachments_Path,Created_By:userID});
+//       res.json({ message: "Minute added auccessfully", meeting_minutes: newMinute });
+//     } catch (err) {
+//     console.error("Insert error:", err);
+//     res.status(500).json({ error: "Database insert failed" });
+//     }
+// })
+router.post('/:bookingId/minutes', async (req, res) => {
+  const id = req.params.bookingId;
+  const { Notes_Text, Attachments_Path } = req.body;
+
+  try {
+    // Validate booking existence
+    const booking = await Booking.findByPk(id);
+    if (!booking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
+    // Validate input
+    if (!Notes_Text ) {
+      return res.status(400).json({ error: "Please fill all the details" });
+    }
+
+    // Create the meeting minute
+    const userID = booking.User_ID;
+    const newMinute = await Meeting_Minutes.create({
+      Booking_ID: id,
+      Notes_Text,
+      Attachments_Path,
+      Created_By: userID,
+    });
+
+    res.json({ message: "Minute added successfully", meeting_minutes: newMinute });
+  } catch (err) {
     console.error("Insert error:", err);
     res.status(500).json({ error: "Database insert failed" });
-    }
-})
+  }
+});
+
 router.put('/:bookingId/minutes', async (req, res) => {
   const id = req.params.bookingId;
   const {Notes_Text,Attachments_Path} = req.body;
@@ -400,7 +483,7 @@ router.put('/:bookingId/minutes', async (req, res) => {
       return res.status(404).json({ message: "Minute not found or no changes made" });
     }
 
-    const updatedMinute = await Meeting_Minutes.findByPk(id);
+    const updatedMinute = await Meeting_Minutes.findOne({ where: { Booking_ID: id } });
     res.json({ message: "Minutes updated", data: updatedMinute });
   } catch (err) {
     console.error("Update error:", err);
@@ -418,8 +501,8 @@ router.delete('/:bookingId/minutes', async(req, res) => {
     }
     res.json(minute);
     } catch (err) {
-    console.error("Fetch by ID error:", err);
-    res.status(500).json({ error: "Failed to fetch Minutes" });
+    console.error("Delete by ID error:", err);
+    res.status(500).json({ error: "Failed to delete Minutes" });
   }
 });
 //recurring

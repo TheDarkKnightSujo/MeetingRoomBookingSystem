@@ -1,0 +1,72 @@
+.PageBackground {
+  min-height: 100vh;
+  
+  padding: 40px 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.BookContents {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.booking-card {
+  border: 1px solid #ddd;
+  border-left: 5px solid #4A90E2;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: #f9f9f9;
+}
+
+.booking-card h3 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+}
+
+.booking-card p {
+  margin: 5px 0;
+  color: #555;
+}
+
+.booking-card ul {
+  margin: 5px 0 15px 20px;
+  padding: 0;
+  color: #444;
+}
+
+.booking-card textarea,
+.booking-card input[type="text"] {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 8px 10px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.booking-card button {
+  padding: 8px 16px;
+  background-color: #4A90E2;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.booking-card button:hover {
+  background-color: #357ABD;
+}

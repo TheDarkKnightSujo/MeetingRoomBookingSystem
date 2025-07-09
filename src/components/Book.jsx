@@ -279,7 +279,7 @@ const Book = () => {
             <img src="/logo.png" alt="Company Logo" className="logo" />
             <h1>Meeting Room Booking System</h1>
           </div>
-          <button className="logout-btn">Logout</button>
+         
         </header>
 
         <div>

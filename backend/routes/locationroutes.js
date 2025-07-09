@@ -3,7 +3,7 @@ const router = express.Router();
 const db=require("../models");
 
 const Location=db.location;
-const MeetingRoom=db.meeting
+const MeetingRoom=db.meetingroom;
 
 router.get('/',async(_,res)=>{
     try{

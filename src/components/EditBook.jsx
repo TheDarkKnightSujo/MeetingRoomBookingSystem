@@ -206,9 +206,14 @@ const EditBook = () => {
         const userRes = await axios.get('http://localhost:3001/users/me', { headers });
         const userId = userRes.data.User_ID;
 
+        // const bookingsRes = await axios.get('http://localhost:3001/bookings/my', { headers });
+        // const owned = bookingsRes.data.filter(b => b.User_ID === userId);
+        // setMyBookings(owned);
         const bookingsRes = await axios.get('http://localhost:3001/bookings/my', { headers });
-        const owned = bookingsRes.data.filter(b => b.User_ID === userId);
-        setMyBookings(owned);
+        setMyBookings(bookingsRes.data);
+
+        // console.log("My Bookings:", owned);
+
       } catch (err) {
         console.error('Error fetching bookings:', err);
       }

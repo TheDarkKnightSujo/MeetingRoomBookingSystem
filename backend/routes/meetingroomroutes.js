@@ -562,7 +562,7 @@ router.get('/:roomId/features',async(req,res)=>{
     try{
         const room=await MeetingRoom.findByPk(roomId,{
             include:{
-                model:Room_Features,
+                model:RoomFeature,
                 as: "features",
                 through:{attributes:[]}
             }
@@ -571,7 +571,7 @@ router.get('/:roomId/features',async(req,res)=>{
         if (!room) {
             return res.status(404).json({ error: "Meeting room not found" });
         }
-        return res.json(room.room_features);
+        return res.json(room.features);
     } catch (err) {
         console.error("Error fetching room features:", err);
         res.status(500).json({ error: "Server error" });

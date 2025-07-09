@@ -7,6 +7,7 @@ const MeetingRooms = () => {
   const [rooms, setRooms] = useState([]);
   const [features,setFeatures]=useState([]);
   const [selectedRoomID,setSelectedRoomID]=useState([]);
+  const [selectedRoomName,setSelectedRoomName]=useState([]);
   useEffect(() => {
     const fetchMeetingRooms = async () => {
       try {
@@ -23,6 +24,8 @@ const MeetingRooms = () => {
     setSelectedRoomID(roomID);
     try {
       const response = await axios.get(`http://localhost:3001/meeting-rooms/${roomID}/features`);
+      const responseRoom =await axios.get(`http://localhost:3001/meeting-rooms/${roomID}`);
+      setSelectedRoomName(responseRoom.data.Name);
       setFeatures(response.data);
     } catch (error) {
       console.error("Error fetching availability:", error);
@@ -39,7 +42,6 @@ const MeetingRooms = () => {
           <img src="/logo.png" alt="Company Logo" className="logo" />
           <h1>Meeting Room Booking System</h1>
         </div>
-        
       </header>
         <div>
           <label>Select a Room:</label>
@@ -54,7 +56,7 @@ const MeetingRooms = () => {
         </div>
           {features.length > 0 && (
           <div className="room-features">
-            <h3>Features for Room ID: {selectedRoomID}</h3>
+            <h3>Features for Room : {selectedRoomName}</h3>
             <ul>
               {features.map((feature) => (
                 <li key={feature.Feature_ID}>
