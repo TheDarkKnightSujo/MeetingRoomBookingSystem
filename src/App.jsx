@@ -12,6 +12,10 @@ import Locations from './components/Locations';
 import ViewMinutes from './components/ViewMinutes';
 import EditBook from './components/EditBook';
 import PreviousMeetings from './components/PreviousMeetings';
+import AdminDash from './components/AdminDash';
+import MeetingRoomsAdmin from './components/meetingrooms-admin';
+import LocationsAdmin from './components/locations-admin';
+import Users from './components/Users';
 function App() {
   return (
     <Routes>
@@ -26,6 +30,10 @@ function App() {
       <Route path="/minutes" element={<ViewMinutes/>}/>
       <Route path="/editbook" element={<EditBook/>}/>
       <Route path="/previous" element={<PreviousMeetings/>}/>
+      <Route path="/admin" element={<AdminDash/>}/>
+      <Route path="/meetingrooms-admin" element={<MeetingRoomsAdmin/>}/>
+      <Route path="/locations-admin" element={<LocationsAdmin/>}/>
+      <Route path="/users" element={<Users/>}/>
     </Routes>
   );
 }

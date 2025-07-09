@@ -577,6 +577,28 @@ router.get('/:roomId/features',async(req,res)=>{
         res.status(500).json({ error: "Server error" });
     }
 });
+
+router.post('/:roomId/features/map', verifyJwt, verifyAdmin, async (req, res) => {
+  const Room_ID = req.params.roomId;
+  const { Feature_ID } = req.body;
+
+  if (!Feature_ID) return res.status(400).json({ error: "Feature_ID is required" });
+
+  try {
+    const room = await db.meetingroom.findByPk(Room_ID);
+    const feature = await db.room_feature.findByPk(Feature_ID);
+    if (!room || !feature) {
+      return res.status(404).json({ error: "Room or Feature not found" });
+    }
+
+    await room.addFeature(feature);
+    res.json({ message: "Feature mapped to room" });
+  } catch (err) {
+    console.error("Error mapping feature:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 router.post('/:roomId/features',verifyJwt,verifyAdmin,async(req,res)=>{
   const Room_ID=req.params.roomId;
   const {Name}=req.body;
@@ -609,7 +631,7 @@ router.delete('/:roomId/features/:featureId', verifyJwt, verifyAdmin, async (req
       return res.status(404).json({ error: "Room or Feature not found" });
     }
 
-    await room.removeRoom_feature(feature); 
+    await room.removeFeature(feature); 
     res.json({ message: "Feature removed from room" });
   } catch (err) {
     console.error("Error removing feature from room:", err);

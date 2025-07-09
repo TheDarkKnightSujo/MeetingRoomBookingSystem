@@ -34,5 +34,19 @@ router.post("/",verifyJwt,verifyAdmin, async (req, res) => {
     res.status(500).json({ error: "Database insert failed" });
   }
 });
+router.delete("/:id",verifyJwt,verifyAdmin,async(req,res)=>{
+  const id = req.params.id;
+    try {
+    const feature = await Room_Features.destroy({where:{Feature_ID:id}});
+
+    if (!feature) {
+      return res.status(404).json({ message: "Feature not found" });
+    }
+    res.json(feature);
+    } catch (err) {
+    console.error("Delete by ID error:", err);
+    res.status(500).json({ error: "Failed to delete feature" });
+  }
+});
 
 module.exports=router;

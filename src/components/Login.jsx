@@ -17,10 +17,18 @@ const Login = () => {
   try {
     const response=await axios.post("http://localhost:3001/users/login",{Email:email,password:password},{withCredentials:true});
     if(response.status==200||response.status==204){
-      localStorage.setItem("token", response.data.token);
-      alert("Login Successful");
-      navigate("/dashboard");
-      return;
+      const { token, Role, User_ID, First_Name } = response.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("userRole", Role);
+      localStorage.setItem("userId", User_ID);
+      localStorage.setItem("userName", First_Name);
+      alert("Login Succesful");
+      
+      if (Role === 'Admin') {
+        navigate("/admin");   
+      } else {
+        navigate("/dashboard"); 
+      }
     }
 
   }catch(err){

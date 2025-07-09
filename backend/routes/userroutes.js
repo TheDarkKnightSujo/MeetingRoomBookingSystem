@@ -86,7 +86,13 @@ router.post("/login",async(req,res)=>{
     
     res.cookie('jwt', refreshToken , {httpOnly:true,maxAge:24*60*60*1000});
     
-    res.json({token:refreshToken});
+    res.json({
+    token: refreshToken,
+     Role: user.Role,
+     First_Name: user.First_Name,
+     User_ID: user.User_ID
+    });
+
   }catch(err){
     res.status(401);
   }
@@ -152,10 +158,11 @@ router.put('/me',verifyJwt,async(req,res)=>{
     res.status(500).json({error:"Update failed"});
   }
 });
-router.put('/me',verifyJwt,verifyAdmin,async(req,res)=>{
+router.put('/:id',verifyJwt,verifyAdmin,async(req,res)=>{
   const {First_Name,Last_Name,Email,password,Role}=req.body;
+  const userID=req.params.id;
   try{
-    const userID= req.user.User_ID;
+    
     const currentuser=await User.findByPk(userID);
     if(!currentuser){
       res.status(404).json({error:"User not found"});

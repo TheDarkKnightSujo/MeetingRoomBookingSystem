@@ -1,7 +1,14 @@
 const express= require('express');
 const router = express.Router();
 const db=require("../models");
+const jwt=require('jsonwebtoken');
 
+const REFERSH_TOKEN_SECRET = process.env.REFERSH_TOKEN_SECRET;
+
+require('dotenv').config();
+
+const verifyJwt=require("../verifyJWT");
+const verifyAdmin=require("../verifyadmin");
 const Location=db.location;
 const MeetingRoom=db.meetingroom;
 
@@ -15,7 +22,7 @@ router.get('/',async(_,res)=>{
         res.status(500).json({ error: "Server Error" });
     }
 });
-router.get('/:id', async(req, res) => {
+router.get('/:id', verifyAdmin,async(req, res) => {
     const id = req.params.id;
     try {
     const location = await Location.findByPk(id);
@@ -44,7 +51,7 @@ router.post("/", async (req, res) => {
     res.status(500).json({ error: "Database insert failed" });
   }
 });
-router.put('/:id', async (req, res) => {
+router.put('/:id', verifyAdmin, async (req, res) => {
   const id = req.params.id;
   const { Name, Address, City, Postal_Code } = req.body;
 
@@ -65,7 +72,7 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({ error: "Failed to update location" });
   }
 });
-router.delete('/:id', async(req, res) => {
+router.delete('/:id', verifyAdmin, async(req, res) => {
     const id = req.params.id;
     try {
     const location = await Location.destroy({where:{Location_ID:id}});
