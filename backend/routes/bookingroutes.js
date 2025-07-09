@@ -36,7 +36,91 @@ router.get('/',verifyAdmin,async(_,res)=>{
 //         res.status(500).json({error:"Server Error"});
 //     }
 // });
-router.get('/my', verifyJwt,async (req, res) => {
+// router.get('/my', verifyJwt,async (req, res) => {
+//   try {
+//     const userId = req.user.User_ID;
+
+//     // Get bookings created by the user
+//     const bookedByMe = await Booking.findAll({
+//       where: { User_ID: userId },
+//       include: [
+//   {
+//     model: db.users,
+//     as: "User",
+//     attributes: ["First_Name", "Last_Name"],
+//   },
+//   {
+//     model: MeetingRoom,
+//     as: "MeetingRoom",
+//     attributes: ["Room_ID","Name"],
+//   },
+//   {
+//     model: db.participants,
+//     as: "Participants",
+//     attributes: ["User_ID"],
+//   }
+// ]
+
+//     });
+
+//     // Get Booking IDs where user is a participant
+//     const participantEntries = await Participants.findAll({
+//       where: { User_ID: userId },
+//       attributes: ['Booking_ID']
+//     });
+
+//     const bookingIds = participantEntries.map(p => p.Booking_ID);
+
+//     // Get those bookings (excluding duplicates)
+//     const invitedTo = await Booking.findAll({
+//       where: {
+//         Booking_ID: bookingIds
+//       },
+//       include: [
+//         {
+//           model: db.users,
+//           as:"User",
+//           attributes: ['First_Name', 'Last_Name']
+//         },
+//         {
+//           model: db.meetingroom,
+//           as:"MeetingRoom",
+//           attributes: ['Name']
+//         },
+//         {
+//           model: Participants,
+//           attributes: ['User_ID']
+//         }
+//       ]
+//     });
+
+//     // Merge & deduplicate
+//     const all = [...bookedByMe, ...invitedTo];
+//     const uniqueMap = new Map();
+//     all.forEach(b => uniqueMap.set(b.Booking_ID, b));
+//     const uniqueBookings = Array.from(uniqueMap.values());
+//     const now = new Date();
+
+//     const determineStatus = (startTime, endTime) => {
+//       startTime = new Date(startTime);
+//       endTime = new Date(endTime);
+//       if (now < startTime) return "Upcoming";
+//       if (now >= startTime && now <= endTime) return "Ongoing";
+//       return "Past";
+//     };
+
+//     const bookingsWithStatus = uniqueBookings.map((b) => {
+//       const json = b.toJSON();
+//       json.Status = determineStatus(json.Start_Time, json.End_Time);
+//       return json;
+//     });
+//     res.json(bookingsWithStatus);
+//   } catch (err) {
+//     console.error("Error in /bookings/my:", err);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
+  router.get('/my', verifyJwt, async (req, res) => {
   try {
     const userId = req.user.User_ID;
 
@@ -44,23 +128,22 @@ router.get('/my', verifyJwt,async (req, res) => {
     const bookedByMe = await Booking.findAll({
       where: { User_ID: userId },
       include: [
-  {
-    model: db.users,
-    as: "User",
-    attributes: ["First_Name", "Last_Name"],
-  },
-  {
-    model: MeetingRoom,
-    as: "MeetingRoom",
-    attributes: ["Room_ID","Name"],
-  },
-  {
-    model: db.participants,
-    as: "Participants",
-    attributes: ["User_ID"],
-  }
-]
-
+        {
+          model: db.users,
+          as: "User",
+          attributes: ["First_Name", "Last_Name"],
+        },
+        {
+          model: MeetingRoom,
+          as: "MeetingRoom",
+          attributes: ["Room_ID", "Name"],
+        },
+        {
+          model: db.participants,
+          as: "Participants",
+          attributes: ["User_ID"],
+        }
+      ]
     });
 
     // Get Booking IDs where user is a participant
@@ -79,16 +162,17 @@ router.get('/my', verifyJwt,async (req, res) => {
       include: [
         {
           model: db.users,
-          as:"User",
+          as: "User",
           attributes: ['First_Name', 'Last_Name']
         },
         {
           model: db.meetingroom,
-          as:"MeetingRoom",
-          attributes: ['Name']
+          as: "MeetingRoom",
+          attributes: ['Room_ID', 'Name']
         },
         {
           model: Participants,
+          as: "Participants",
           attributes: ['User_ID']
         }
       ]
@@ -102,19 +186,37 @@ router.get('/my', verifyJwt,async (req, res) => {
     const now = new Date();
 
     const determineStatus = (startTime, endTime) => {
-      startTime = new Date(startTime);
-      endTime = new Date(endTime);
-      if (now < startTime) return "Upcoming";
-      if (now >= startTime && now <= endTime) return "Ongoing";
+      const start = new Date(startTime);
+      const end = new Date(endTime);
+      if (now < start) return "Upcoming";
+      if (now >= start && now <= end) return "Ongoing";
       return "Past";
     };
 
-    const bookingsWithStatus = uniqueBookings.map((b) => {
+    const bookingsWithStatusAndIST = uniqueBookings.map((b) => {
       const json = b.toJSON();
+
+      const startUTC = new Date(json.Start_Time);
+      const endUTC = new Date(json.End_Time);
+
+      const formatOptions = {
+        timeZone: "Asia/Kolkata",
+        hour12: false,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      };
+
       json.Status = determineStatus(json.Start_Time, json.End_Time);
+      json.Start_Time_IST = startUTC.toLocaleString("en-GB", formatOptions);
+      json.End_Time_IST = endUTC.toLocaleString("en-GB", formatOptions);
+
       return json;
     });
-    res.json(bookingsWithStatus);
+
+    res.json(bookingsWithStatusAndIST);
   } catch (err) {
     console.error("Error in /bookings/my:", err);
     res.status(500).json({ error: "Server error" });

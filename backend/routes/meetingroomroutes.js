@@ -14,7 +14,7 @@ const Participants=db.participants;
 const Users=db.users;
 const RoomFeature = db.room_feature;
 const Location = db.location;
-
+const Room_Feature_Mapping=db.room_feature_mapping;
 router.get('/',async(_,res)=>{
     try{
         const meetingrooms=await MeetingRoom.findAll();
@@ -189,14 +189,16 @@ router.get("/:roomId/availability", async (req, res) => {
     const endMinutes = endH * 60 + endM;
 
     while (startMinutes < endMinutes) {
-      // 👇 This is now based on local IST time
-      const slotStart = new Date(year, month - 1, day, 0, 0, 0); // Local time
-      slotStart.setMinutes(startMinutes);
+      const slotIST_H = Math.floor(startMinutes / 60);
+      const slotIST_M = startMinutes % 60;
+
+      // Construct as UTC corresponding to IST
+      const slotStart = new Date(Date.UTC(year, month - 1, day, slotIST_H - 5, slotIST_M - 30));
       const slotEnd = new Date(slotStart.getTime() + 30 * 60000);
 
       slots.push({
-        start: new Date(slotStart),
-        end: new Date(slotEnd),
+        start: slotStart,
+        end: slotEnd,
         isBooked: false,
       });
 
@@ -207,11 +209,12 @@ router.get("/:roomId/availability", async (req, res) => {
   return slots;
 }
 
+
   try {
     const slots = generateTimeSlots(date);
 
-    const startOfDay = `${date} 00:00:00`;
-    const endOfDay = `${date} 23:59:59`;
+    const startOfDay = new Date(`${date}T00:00:00.000Z`);
+    const endOfDay = new Date(`${date}T23:59:59.999Z`);
 
     const bookings = await Booking.findAll({
       where: {
@@ -234,41 +237,38 @@ router.get("/:roomId/availability", async (req, res) => {
       }
     });
 
-    const formatter = new Intl.DateTimeFormat("en-IN", {
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: true,
-  timeZone: "Asia/Kolkata"
-});
+    const formatted = slots.map((slot) => {
+      const istStart = slot.start.toLocaleString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Kolkata",
+      });
 
-const formatted = slots.map((slot) => ({
-  startTime: slot.start.toLocaleTimeString("en-IN", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-    timeZone: "Asia/Kolkata",
-  }),
-  endTime: slot.end.toLocaleTimeString("en-IN", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-    timeZone: "Asia/Kolkata",
-  }),
-  isBooked: slot.isBooked,
-}));
+      const istEnd = slot.end.toLocaleString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Kolkata",
+      });
 
-
+      return {
+        startTime: istStart,
+        endTime: istEnd,
+        isBooked: slot.isBooked,
+      };
+    });
 
     return res.json(formatted);
-    console.log("Raw UTC slot.start:", slot.start.toISOString());
-console.log("India time:", formatter.format(slot.start));
   } catch (err) {
-    console.error(" Availability route error:", err);
+    console.error("Error fetching availability:", err);
     return res.status(500).json({ error: "Server error" });
   }
 });
 
+
 //booking
+
 // router.post('/:roomId/booking',async(req,res)=>{
     
 //   const userId=req.userID;
@@ -329,10 +329,117 @@ console.log("India time:", formatter.format(slot.start));
 //   }
 // });
 
-//meeting room features
 
 
-router.post('/:roomId/bookings',verifyJWT, async (req, res) => {
+
+// router.post('/:roomId/bookings',verifyJWT, async (req, res) => {
+//   const userId = req.user.User_ID;
+//   const { roomId } = req.params;
+//   const { title, startTime, endTime, participants = [] } = req.body;
+
+//   if (!userId || !title || !startTime || !endTime) {
+//     return res.status(400).json({ error: "Missing required fields" });
+//   }
+
+//   const start = startTime;
+//   const end = endTime;
+
+//   try {
+//     //  1. Check for time conflicts in the same room
+//     const conflict = await Booking.findOne({
+//     where: {
+//     Room_ID: roomId,
+//     Start_Time: { [Op.lt]: end },
+//     End_Time: { [Op.gt]: start }
+//     }
+//     });
+
+
+//     if (conflict) {
+//       return res.status(409).json({ error: "This time slot is already booked for this room." });
+//     }
+
+//     //  2. Check for user's own conflicting bookings (as owner or participant)
+//     const userConflicts = await Booking.findAll({
+//       where: {
+//         [Op.or]: [
+//           { User_ID: userId },
+//           {
+//             Booking_ID: {
+//               [Op.in]: Sequelize.literal(`(SELECT Booking_ID FROM participants WHERE User_ID = ${userId})`)
+//             }
+//           }
+//         ],
+//         [Op.and]: [
+//           { Start_Time: { [Op.lt]: end } },
+//           { End_Time: { [Op.gt]: start } }
+//         ]
+//       }
+//     });
+
+//     if (userConflicts.length > 0) {
+//       return res.status(409).json({ error: "You already have a meeting at this time." });
+//     }
+
+//     //  3. Check each participant for conflicts
+//     for (const email of participants) {
+//       const participant = await Users.findOne({ where: { Email: email } });
+//       if (!participant) continue;
+
+//       const participantConflicts = await Booking.findAll({
+//         where: {
+//           [Op.or]: [
+//             { User_ID: participant.User_ID },
+//             {
+//               Booking_ID: {
+//                 [Op.in]: Sequelize.literal(`(SELECT Booking_ID FROM participants WHERE User_ID = ${participant.User_ID})`)
+//               }
+//             }
+//           ],
+//           [Op.and]: [
+//             { Start_Time: { [Op.lt]: end } },
+//             { End_Time: { [Op.gt]: start } }
+//           ]
+//         }
+//       });
+
+//       if (participantConflicts.length > 0) {
+//         return res.status(409).json({ error: `Participant ${email} is unavailable at this time.` });
+//       }
+//     }
+
+//     //  4. Create the booking
+//     const newBooking = await Booking.create({
+//       Room_ID: roomId,
+//       User_ID: userId,
+//       Title: title,
+//       Start_Time: start,
+//       End_Time: end,
+//       Status: "Confirmed",
+//       Created_At: new Date(),
+//       Updated_At: new Date(),
+//     });
+
+//     //  5. Add participants
+//     for (const email of participants) {
+//       const participant = await Users.findOne({ where: { Email: email } });
+//       if (participant) {
+//         await Participants.create({
+//           Booking_ID: newBooking.Booking_ID,
+//           User_ID: participant.User_ID
+//         });
+//       }
+//     }
+
+//     return res.status(201).json({ message: "Booking successful", booking: newBooking });
+//   } catch (err) {
+//     console.error("Error booking room:", err);
+//     return res.status(500).json({ error: "Server error" });
+//   }
+// });
+
+
+router.post('/:roomId/bookings', verifyJWT, async (req, res) => {
   const userId = req.user.User_ID;
   const { roomId } = req.params;
   const { title, startTime, endTime, participants = [] } = req.body;
@@ -341,47 +448,54 @@ router.post('/:roomId/bookings',verifyJWT, async (req, res) => {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
-  const start = startTime;
-  const end = endTime;
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+
+  if (isNaN(start) || isNaN(end)) {
+    return res.status(400).json({ error: "Invalid date format" });
+  }
+
+  if (start >= end) {
+    return res.status(400).json({ error: "Start time must be before end time." });
+  }
 
   try {
-    // 🛑 1. Check for time conflicts in the same room
+    // 1. Check room conflict
     const conflict = await Booking.findOne({
-    where: {
-    Room_ID: roomId,
-    Start_Time: { [Op.lt]: end },
-    End_Time: { [Op.gt]: start }
-    }
+      where: {
+        Room_ID: roomId,
+        Start_Time: { [Op.lt]: end },
+        End_Time: { [Op.gt]: start },
+      },
     });
-
 
     if (conflict) {
       return res.status(409).json({ error: "This time slot is already booked for this room." });
     }
 
-    // 🛑 2. Check for user's own conflicting bookings (as owner or participant)
+    // 2. Check user's own conflicts
     const userConflicts = await Booking.findAll({
       where: {
         [Op.or]: [
           { User_ID: userId },
           {
             Booking_ID: {
-              [Op.in]: Sequelize.literal(`(SELECT Booking_ID FROM participants WHERE User_ID = ${userId})`)
-            }
-          }
+              [Op.in]: Sequelize.literal(`(SELECT Booking_ID FROM participants WHERE User_ID = ${userId})`),
+            },
+          },
         ],
         [Op.and]: [
           { Start_Time: { [Op.lt]: end } },
-          { End_Time: { [Op.gt]: start } }
-        ]
-      }
+          { End_Time: { [Op.gt]: start } },
+        ],
+      },
     });
 
     if (userConflicts.length > 0) {
       return res.status(409).json({ error: "You already have a meeting at this time." });
     }
 
-    // 🛑 3. Check each participant for conflicts
+    // 3. Check conflicts for each participant
     for (const email of participants) {
       const participant = await Users.findOne({ where: { Email: email } });
       if (!participant) continue;
@@ -392,15 +506,15 @@ router.post('/:roomId/bookings',verifyJWT, async (req, res) => {
             { User_ID: participant.User_ID },
             {
               Booking_ID: {
-                [Op.in]: Sequelize.literal(`(SELECT Booking_ID FROM participants WHERE User_ID = ${participant.User_ID})`)
-              }
-            }
+                [Op.in]: Sequelize.literal(`(SELECT Booking_ID FROM participants WHERE User_ID = ${participant.User_ID})`),
+              },
+            },
           ],
           [Op.and]: [
             { Start_Time: { [Op.lt]: end } },
-            { End_Time: { [Op.gt]: start } }
-          ]
-        }
+            { End_Time: { [Op.gt]: start } },
+          ],
+        },
       });
 
       if (participantConflicts.length > 0) {
@@ -408,25 +522,25 @@ router.post('/:roomId/bookings',verifyJWT, async (req, res) => {
       }
     }
 
-    // ✅ 4. Create the booking
+    // 4. Create booking
     const newBooking = await Booking.create({
       Room_ID: roomId,
       User_ID: userId,
       Title: title,
-      Start_Time: start,
-      End_Time: end,
+      Start_Time: start.toISOString(),
+      End_Time: end.toISOString(),
       Status: "Confirmed",
       Created_At: new Date(),
       Updated_At: new Date(),
     });
 
-    // ✅ 5. Add participants
+    // 5. Add participants
     for (const email of participants) {
       const participant = await Users.findOne({ where: { Email: email } });
       if (participant) {
         await Participants.create({
           Booking_ID: newBooking.Booking_ID,
-          User_ID: participant.User_ID
+          User_ID: participant.User_ID,
         });
       }
     }
@@ -439,6 +553,9 @@ router.post('/:roomId/bookings',verifyJWT, async (req, res) => {
 });
 
 
+
+
+//meeting room features
 
 router.get('/:roomId/features',async(req,res)=>{
     const roomId=req.params.roomId;

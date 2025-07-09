@@ -27,7 +27,7 @@ const { FOREIGNKEYS } = require("sequelize/lib/query-types");
   if (db[modelName].associate) {
     db[modelName].associate(db);  
   }
-});
+  });
 
 
 

@@ -13,5 +13,7 @@ module.exports=(sequelize,DataTypes)=>{
     tableName: "room_feature",
     timestamps: false
     })
+    
+
     return Room_Feature
 }
