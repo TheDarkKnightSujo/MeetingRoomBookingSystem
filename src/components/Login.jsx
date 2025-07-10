@@ -32,7 +32,7 @@ const Login = () => {
     }
 
   }catch(err){
-    console.error("Login failed");
+    console.error("Login failed",err);
     alert("Invalid username or password")
   }
 };

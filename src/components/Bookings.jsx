@@ -3,26 +3,16 @@ import axios from "axios";
 
 
 const Bookings = () => {
-  const [users, setUsers] = useState([]);
-  const [selectedUserId, setSelectedUserId] = useState("");
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [editMode, setEditMode] = useState(false);
+  
 
   const [bookings,setBookings]=useState([]);
 
-  const [form, setForm] = useState({
-    First_Name: "",
-    Last_Name: "",
-    Email: "",
-    Role: "",
-  });
-
-  const headers = {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
-  };
+  
 
   useEffect(() => {
-
+    const headers = {
+    Authorization: `Bearer ${localStorage.getItem("token")}`,
+  };
     const fetchBookings=async()=>{
         try{
             const res=await axios.get("http://localhost:3001/bookings",{headers});
