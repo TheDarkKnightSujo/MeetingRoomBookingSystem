@@ -90,6 +90,9 @@ const AdminDash = () => {
           <li className={activeTab === 'users' ? 'active' : ''} onClick={() => setActiveTab('users')}>
             <Link to="/users">Users</Link>
           </li>
+          <li className={activeTab === 'bookings' ? 'active' : ''} onClick={() => setActiveTab('bookings')}>
+            <Link to="/bookings-admin">All Bookings</Link>
+          </li>
         </ul>
       </aside>
 

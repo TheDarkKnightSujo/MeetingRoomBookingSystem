@@ -16,6 +16,7 @@ import AdminDash from './components/AdminDash';
 import MeetingRoomsAdmin from './components/meetingrooms-admin';
 import LocationsAdmin from './components/locations-admin';
 import Users from './components/Users';
+import Bookings from './components/Bookings';
 function App() {
   return (
     <Routes>
@@ -34,6 +35,7 @@ function App() {
       <Route path="/meetingrooms-admin" element={<MeetingRoomsAdmin/>}/>
       <Route path="/locations-admin" element={<LocationsAdmin/>}/>
       <Route path="/users" element={<Users/>}/>
+      <Route path="/bookings-admin" element={<Bookings/>}/>
     </Routes>
   );
 }

@@ -16,7 +16,7 @@ const MeetingRoom=db.meetingroom;
 const User=db.users;
 
 
-router.get('/',verifyAdmin,async(_,res)=>{
+router.get('/',verifyJwt,verifyAdmin,async(_,res)=>{
     try{
         const Bookings=await Booking.findAll();
         return res.json(Bookings);
