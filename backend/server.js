@@ -296,6 +296,9 @@ app.use('/meeting-rooms',meetingroomRoutes);
 
 //bookings
 app.use("/bookings",bookingRoutes);
+app.use('/bookings', bookingRoutes);
+console.log("✅ Bookings routes mounted at /bookings");
+
 // app.get('/bookings',async(_,res)=>{
 //     try{
 //         const Bookings=await Booking.findAll();

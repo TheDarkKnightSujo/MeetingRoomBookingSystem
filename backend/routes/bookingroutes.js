@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const express= require('express');
 const router = express.Router();
 const db=require("../models");
@@ -13,7 +14,7 @@ const Booking=db.booking;
 const Participants=db.participants;
 const Meeting_Minutes=db.meeting_minutes;
 const MeetingRoom=db.meetingroom;
-const User=db.users;
+const Users=db.users;
 
 
 router.get('/',verifyJwt,verifyAdmin,async(_,res)=>{
@@ -339,60 +340,103 @@ router.get('/:bookingId/participants',async(req,res)=>{
         res.status(500).json({ error: "Server Error" });
     }
 });
-router.post('/:bookingId/participants', async (req, res) => {
+// router.post('/:bookingId/participants', async (req, res) => {
   
-  const Bookingid=req.params.bookingId;
-  const { email } = req.body;
-  if(!email){
-    return res.status(400).json({error:"Please provide email address"});
+//   const Bookingid=req.params.bookingId;
+//   const { email } = req.body;
+//   if(!email){
+//     return res.status(400).json({error:"Please provide email address"});
+//   }
+//   const emailList=email.split(',').map(email=>email.trim());
+//   try{
+//     const booking =await Booking.findByPk(Bookingid);
+//     if(!booking){
+//       return res.status(404).json({error:"Booking not found"});
+//     }
+//     const users=await User.findAll({where:{Email:emailList}});
+//     if(users.length===0){
+//       return res.status(404).json({error:"Users not found"});
+//     }
+//       const participantsData=users.map(user=>({
+//         Booking_ID:Bookingid,
+//         User_ID:user.user_ID,
+//       }));
+//       const addedParticipants = await Participants.bulkCreate(participantsData);
+//       return res.json({ message: "Participants added", participants: addedParticipants });
+//   }
+//   catch(err){
+//     console.error("Error adding participants:", err);
+//     res.status(500).json({ error: "Failed to add participants" });
+//   }
+// });
+// router.put('/:bookingId/participants', async (req, res) => {
+//   const Bookingid = req.params.bookingId;
+
+//   const {Invitation_Status,Notification_Sent} = req.body;
+
+//   try {
+//     const [updated] = await Participants.update(
+//       {Invitation_Status,Notification_Sent},
+//       { where: { 
+//         Booking_ID: Bookingid,
+//         User_Id:Userid
+//        }}
+//     );
+
+//     if (updated === 0) {
+//       return res.status(404).json({ message: "Participant not found or no changes made" });
+//     }
+
+//     const updatedBooking = await Booking.findByPk(Bookingid);
+//     res.json({ message: "Participant updated", data: updatedBooking });
+//   } catch (err) {
+//     console.error("Update error:", err);
+//     res.status(500).json({ error: "Failed to update Participant" });
+//   }
+// });
+router.post('/:bookingId/participants', async (req, res) => {
+  const { bookingId } = req.params;
+  const { emails } = req.body;
+  console.log("🔔 Booking participant route hit");
+  console.log("📩 Full req.body:", req.body);
+
+
+  // ✅ Validate
+  if (!Array.isArray(emails) || emails.length === 0) {
+    return res.status(400).json({ error: "Invalid or missing 'emails' array" });
   }
-  const emailList=email.split(',').map(email=>email.trim());
-  try{
-    const booking =await Booking.findByPk(Bookingid);
-    if(!booking){
-      return res.status(404).json({error:"Booking not found"});
+
+  try {
+    // ✅ Optional: Validate each email exists in the users table
+    const users = await Users.findAll({
+      where: { Email: emails },
+      attributes: ['User_ID', 'Email']
+    });
+
+    if (users.length === 0) {
+      return res.status(404).json({ error: "No matching users found for the provided emails" });
     }
-    const users=await User.findAll({where:{Email:emailList}});
-    if(users.length===0){
-      return res.status(404).json({error:"Users not found"});
-    }
-      const participantsData=users.map(user=>({
-        Booking_ID:Bookingid,
-        User_ID:user.user_ID,
-      }));
-      const addedParticipants = await Participants.bulkCreate(participantsData);
-      return res.json({ message: "Participants added", participants: addedParticipants });
-  }
-  catch(err){
+
+    // ✅ Prepare participant insert data
+    const participantData = users.map(user => ({
+      Booking_ID: bookingId,
+      User_ID: user.User_ID,
+      Invitation_Status: 'Pending',
+      Notification_Sent: false
+    }));
+
+    // ✅ Bulk insert (ignore duplicates)
+    await Participants.bulkCreate(participantData, {
+      ignoreDuplicates: true
+    });
+
+    res.status(201).json({ message: "Participants added successfully" });
+  } catch (err) {
     console.error("Error adding participants:", err);
     res.status(500).json({ error: "Failed to add participants" });
   }
 });
-router.put('/:bookingId/participants/:userId', async (req, res) => {
-  const Bookingid = req.params.bookingId;
-  const Userid=req.params.userId;
-  const {Invitation_Status,Notification_Sent} = req.body;
 
-  try {
-    const [updated] = await Participants.update(
-      {Invitation_Status,Notification_Sent},
-      { where: { 
-        Booking_ID: Bookingid,
-        User_Id:Userid
-       }}
-    );
-
-    if (updated === 0) {
-      return res.status(404).json({ message: "Participant not found or no changes made" });
-    }
-
-    const updatedBooking = await Booking.findByPk(id);
-    res.json({ message: "Participant updated", data: updatedBooking });
-  } catch (err) {
-    console.error("Update error:", err);
-    res.status(500).json({ error: "Failed to update Participant" });
-  }
-});
 router.delete('/:bookingId/participants/:userId', async(req, res) => {
     const Bookingid = req.params.bookingId;
     const Userid=req.params.userId;
@@ -505,14 +549,7 @@ router.delete('/:bookingId/minutes', async(req, res) => {
     res.status(500).json({ error: "Failed to delete Minutes" });
   }
 });
-//recurring
 
-router.post("/recurring",verifyJwt,async(req,res)=>{
-
-});
-router.get("/:parentId/instances",verifyJwt,async(req,res)=>{
-  
-});
 
 
 

@@ -295,9 +295,10 @@ const EditBook = () => {
   const handleAddParticipants = async () => {
     const emails = participantEmails.split(',').map(e => e.trim()).filter(e => e);
     try {
-      await axios.post(`http://localhost:3001/bookings/${selectedBooking.Booking_ID}/participants`, {
-        email: emails.join(','),
-      }, { headers });
+      console.log("Sending emails:", emails); // Should log an array like ["a@example.com", "b@example.com"]
+
+      await axios.post(`http://localhost:3001/bookings/${selectedBooking.Booking_ID}/participants`,
+        {emails}, { headers });
 
       fetchParticipants(selectedBooking.Booking_ID);
       setParticipantEmails('');
