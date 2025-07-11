@@ -33,6 +33,49 @@ A robust full-stack system to manage corporate meeting room reservations, recurr
 - Nodemailer (for email notifications)
 
 ---
+## ⚙️ Installation and Run
+
+```bash
+git clone https://github.com/TheDarkKnightSujo/MeetingRoomBookingSystem.git
+cd MeetingRoomBookingSystem
+
+cd backend
+npm install
+
+```
+---
+
+## 🔧 Download SQL
+In backend folder, open the sql query file and run it in the sql workbench.
+
+---
+
+## 🔧 Configure MySQL
+Update /backend/models/index.js with your database credentials:
+
+```
+const sequelize = new Sequelize('DB_NAME', 'USERNAME', 'PASSWORD', {
+  host: 'localhost',
+  dialect: 'mysql'
+});
+```
+---
+
+
+
+## ▶️ Start Backend Server
+```
+node server.js
+```
+---
+
+## 3️⃣ Frontend Setup
+```
+npm install
+npm start
+```
+In meetingroom directory
+---
 
 ## 🧩 Database Schema
 
