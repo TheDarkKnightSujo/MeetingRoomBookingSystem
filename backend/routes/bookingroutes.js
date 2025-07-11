@@ -397,17 +397,12 @@ router.get('/:bookingId/participants',async(req,res)=>{
 router.post('/:bookingId/participants', async (req, res) => {
   const { bookingId } = req.params;
   const { emails } = req.body;
-  console.log("🔔 Booking participant route hit");
-  console.log("📩 Full req.body:", req.body);
-
-
-  // ✅ Validate
+  
   if (!Array.isArray(emails) || emails.length === 0) {
     return res.status(400).json({ error: "Invalid or missing 'emails' array" });
   }
 
   try {
-    // ✅ Optional: Validate each email exists in the users table
     const users = await Users.findAll({
       where: { Email: emails },
       attributes: ['User_ID', 'Email']
@@ -417,7 +412,6 @@ router.post('/:bookingId/participants', async (req, res) => {
       return res.status(404).json({ error: "No matching users found for the provided emails" });
     }
 
-    // ✅ Prepare participant insert data
     const participantData = users.map(user => ({
       Booking_ID: bookingId,
       User_ID: user.User_ID,
@@ -425,7 +419,6 @@ router.post('/:bookingId/participants', async (req, res) => {
       Notification_Sent: false
     }));
 
-    // ✅ Bulk insert (ignore duplicates)
     await Participants.bulkCreate(participantData, {
       ignoreDuplicates: true
     });
