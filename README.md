@@ -1,6 +1,7 @@
 #  Meeting Room Booking System
 
 A robust full-stack system to manage corporate meeting room reservations, recurring meetings, participants, room features, and meeting minutes, with audit and compliance tracking.
+```You can find the DEMO video in the cloned repo.```
 
 ---
 
