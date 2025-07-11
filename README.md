@@ -1,7 +1,7 @@
 #  Meeting Room Booking System
 
 A robust full-stack system to manage corporate meeting room reservations, recurring meetings, participants, room features, and meeting minutes, with audit and compliance tracking.
-```You can find the DEMO video in the cloned repo.```
+```You can find the DEMO video in the repo.```
 
 ---
 
@@ -44,6 +44,31 @@ cd backend
 npm install
 
 ```
+You also need to install all these packages:
+```
+├── cookie-parser@1.4.7
+├── cors@2.8.5
+├── dotenv@16.5.0
+├── express-validator@7.2.1
+├── express@5.1.0
+├── jsonwebtoken@9.0.2
+├── mysql2@3.14.1
+├── nodemon@3.1.10
+└── sequelize@6.37.7
+```
+You must also create a .env file:
+```
+REFERSH_TOKEN_SECRET=
+```
+In terminal:
+```bash
+PS C:meetingroom\backend> node
+Welcome to Node.js v22.16.0.
+Type ".help" for more information.
+> require('crypto').randomBytes(64).toString('hex')
+```
+You will get a random number and letter combination, copy this without the quotes and paste it in the ```.env``` file after ```REFERSH_TOKEN_SECRET=```
+
 ---
 
 ## 🔧 Download SQL
